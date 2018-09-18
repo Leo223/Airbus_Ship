@@ -77,10 +77,20 @@ for picture in targets:
         giros = [0,90,180,270]
         for giro in giros:
             ship_giro = ship.rotate(giro)
-            ship_giro.save(os.getcwd()+'/Data_generated/'+picture +'_barco_'+str(giro) +'_'+ str(barco[0]+1)+'.png')
+            ship_giro.save(os.getcwd()+'/Data/Data_generated_1/'+picture +'_barco_'+str(giro) +'_'+ str(barco[0]+1)+'.png')
 
 
 # se crean las imagenes para entrenar (imagenes sin barcos) --> 0
+for picture in targets:
+    datos = targets.get(picture).get('Data')
+    if datos[0] != 0: continue
+    data = ruta + picture
+    imag = Image.open(data)
+    imag = imag.resize((299, 299)).filter(ImageFilter.BLUR)
+    giros = [0, 90, 180, 270]
+    for giro in giros:
+        imag_giro = imag.rotate(giro)
+        imag_giro.save(os.getcwd()+'/Data/Data_generated_0/'+picture.split('.')[0]+'_mar_'+str(giro)+'_'+str(barco[0] + 1)+'.png')
 
 
 
