@@ -93,4 +93,14 @@ for picture in targets:
         imag_giro.save(os.getcwd()+'/Data/Data_generated_0/'+picture.split('.')[0]+'_mar_'+str(giro)+'_'+str(barco[0] + 1)+'.png')
 
 
-
+#
+# Airbus_ships_kaggle_v0.1
+#
+# - Realizando preprocesado de datos (in progress...)
+#   * Reduccion de fotos y agrupandolas
+#   * Creacion de clustering para reducir las zonas de busqueda
+#
+# - Construyendo el modelo de Red Neuronal (in progress...)
+#   * De cero
+#   * Mediante Transfer learning
+#   * Mediante Fine Tuning
