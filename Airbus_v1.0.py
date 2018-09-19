@@ -129,16 +129,24 @@ scipy.misc.imsave('outfile.jpg', x)
 
 ##### Cargamos los datos
 # ruta_Data = os.getcwd() + '/Data'
+k=glob(os.path.join(ruta_Data + train_1, '*'))
+k1=k[-1]
+imgp = image.load_img(k1)
+npip = image.img_to_array(imgp)
+npip = preprocess_input(npip)
+npip = np.array(npip)
+
 
 def load_data():
     ruta_Data = os.getcwd() + '/Data'
     x = []
     y = []
-    len_train = 100
+    len_train = 1000
     train_1 = '/Data_generated_1'
     train_0 = '/Data_generated_0'
     dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[:len_train]
     dataset_tain_0 = glob(os.path.join(ruta_Data + train_0, '*'))[:len_train]
+
 
     for _t1,_t0 in zip(dataset_tain_1,dataset_tain_0):
         # clname1 = os.path.basename(_t1)
@@ -187,7 +195,7 @@ for layer in Model.layers[:Layers_to_freeze]:
     layer.trainable = False
 
 Model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
-Model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1, validation_split=0.1)
+Model.fit(x_train, y_train, batch_size=100, epochs=5, verbose=1, validation_split=0.1)
 
 
 
