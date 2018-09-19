@@ -7,11 +7,12 @@ from sklearn.neighbors import KNeighborsClassifier
 
 from keras.preprocessing import image
 from keras.applications.inception_v3 import InceptionV3,preprocess_input,decode_predictions
-from keras.layers import GlobalAveragePooling2D
+from keras.layers import Dense, GlobalAveragePooling2D
+from keras.models import Model
+from keras.utils import np_utils
 
 import os
-import glob
-
+from glob import glob
 
 ruta = os.getcwd() + '/Data/train/'
 foto = '0005d01c8.jpg'
@@ -100,10 +101,6 @@ row = np.array([list(i).count(cl_ship) for i in x])
 col = np.array([list(i).count(cl_ship) for i in x.T])
 
 
-
-
-
-
 import scipy.misc
 scipy.misc.imsave('outfile.jpg', x)
 
@@ -131,32 +128,39 @@ scipy.misc.imsave('outfile.jpg', x)
 ##########################################
 
 ##### Cargamos los datos
+# ruta_Data = os.getcwd() + '/Data'
 
-def load_data(path, pattern):
-    class_names={}
-    class_id=0
+def load_data():
+    ruta_Data = os.getcwd() + '/Data'
     x = []
     y = []
+    len_train = 100
+    train_1 = '/Data_generated_1'
+    train_0 = '/Data_generated_0'
+    dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[:len_train]
+    dataset_tain_0 = glob(os.path.join(ruta_Data + train_0, '*'))[:len_train]
 
-    for d in glob.glob(os.path.join(path, '*')):
-        clname = os.path.basename(d)
-        for f in glob.glob(os.path.join(d, pattern)):
-            if not clname in class_names:
-                class_names[clname]=class_id
-                class_id += 1
-
-            img = image.load_img(f)
-            npi = image.img_to_array(img)
-            npi = preprocess_input(npi)
-            # for i in range(4):
-                # npi=np.rot90(npi, i)
-            x.append(npi)
-            y.append(class_names[clname])
-
-    return np.array(x), np.array(y), class_names
+    for _t1,_t0 in zip(dataset_tain_1,dataset_tain_0):
+        # clname1 = os.path.basename(_t1)
+        # clname2 = os.path.basename(_t0)
+        img1 = image.load_img(_t1)
+        npi1 = image.img_to_array(img1)
+        npi1 = preprocess_input(npi1)
+        #
+        img0 = image.load_img(_t0)
+        npi0 = image.img_to_array(img0)
+        npi0 = preprocess_input(npi0)
+        #
+        x.append(npi1); y.append([1])
+        x.append(npi0); y.append([0])
 
 
+    return np.array(x), np.array(y)
 
+x_train,y_train = load_data()
+y_train = np_utils.to_categorical(y_train, 2)
+# [0.,1.] --> Barco
+# [1.,0.] --> Mar o No Barco
 
 
 ##### Modelo Red Neuronal
@@ -167,9 +171,10 @@ def add_new_last_layer(base_model, nb_classes):
 
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(500,activation = 'relu')(x)
+    neuronas_out = base_model.output.get_shape()[-1].value
+    x = Dense(2048,activation = 'relu')(x)
     x_pred = Dense(nb_classes,activation='softmax')(x)
-    model = Model(input=base_model.inputs,output=x_pred)
+    model = Model(inputs=base_model.input,outputs=x_pred)
 
     return model
 
@@ -178,11 +183,11 @@ Model = add_new_last_layer(base_model,nb_classes)
 
 Layers_to_freeze = 500
 
-for layer in model.layers[:Layers_to_freeze]:
+for layer in Model.layers[:Layers_to_freeze]:
     layer.trainable = False
 
-model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1, validation_split=0.1)
+Model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
+Model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1, validation_split=0.1)
 
 
 
