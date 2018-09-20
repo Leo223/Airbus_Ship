@@ -54,99 +54,20 @@ for row in df.iterrows():
     targets[foto] = {'Data': Data, 'Cuadriculas': Cuadriculas}
 
 
-
-###############################################################
-# Clustering de imagenes test, Creacion de ventanas para leer la imagen
-# foto = '0005d01c8.jpg'
-# data = ruta + foto
-# ref = Image.open(data)
-# imag = Image.open(data)
-# im2 = imag.convert('L')
-# im2 = image.img_to_array(im2)
-# im2.resize((768,768))
-# kmeans = KMeans(n_clusters=8, random_state=0).fit(im2)
-
-# Criterio de separacion
-# n_clus = kmeans.n_clusters
-# clusters_size = np.array([list(kmeans.labels_).count(clus) for clus in range(n_clus)])
-# cluster_water = list(clusters_size).index(clusters_size.max())
-# criterio = kmeans.cluster_centers_[cluster_water].max()
-# criterio = round(criterio*1.1)
-
-
-# Hacemos un kmeans y lo guardamos como imagen para
-# verificar los
-
-# foto = '0005d01c8.jpg'
-# data = ruta + foto
-# # ref = Image.open(data)
-# imag = Image.open(data)
-# im2 = imag.convert('L')
-# im2 = image.img_to_array(im2)
-# im2.resize((768,768))
-# im3=[]
-# for i in im2:
-#     for j in i: im3.append([j])
-#
-# km2 = KMeans(n_clusters=8, random_state=0).fit(im3)
-# n_clus = km2.n_clusters
-# clusters_size = np.array([list(km2.labels_).count(clus) for clus in range(n_clus)])
-# cl_ship = list(clusters_size).index(clusters_size.min())
-#
-# _h = imag.size[0]
-# _w = imag.size[1]
-# ref = _h*_w
-# x=np.array([km2.labels_[i*_h:i*_h+_h] for i in range(_h)])
-# row = np.array([list(i).count(cl_ship) for i in x])
-# col = np.array([list(i).count(cl_ship) for i in x.T])
-#
-#
-# import scipy.misc
-# scipy.misc.imsave('outfile.jpg', x)
-
-
-
-
-
-
-# for i in range(768):
-#     imag.putpixel((i,263), (0, 255, 0))
-#     imag.putpixel((i,308), (0, 255, 0))
-#     imag.putpixel((i,616), (0, 255, 0))
-#     imag.putpixel((i,723), (0, 255, 0))
-
-
-
-
-
-# criterio = 30
-#
-#
-
 ##########################################
 #########  Entrenamiento #################
 ##########################################
 
 ##### Cargamos los datos
-# ruta_Data = os.getcwd() + '/Data'
-k=glob(os.path.join(ruta_Data + train_1, '*'))
-k1=k[-1]
-imgp = image.load_img(k1)
-npip = image.img_to_array(imgp)
-npip = preprocess_input(npip)
-npip = np.array(npip)
 
-
-def load_data():
+def load_data(init=0, len_train=100):
     ruta_Data = os.getcwd() + '/Data'
     x = []
     y = []
-    len_train = 10
     train_1 = '/Data_generated_1'
     train_0 = '/Data_generated_0'
-    dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[:len_train]
-    dataset_tain_0 = glob(os.path.join(ruta_Data + train_0, '*'))[:len_train]
-
+    dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[init:len_train]
+    dataset_tain_0 = glob(os.path.join(ruta_Data + train_0, '*'))[init:len_train]
 
     for _t1,_t0 in zip(dataset_tain_1,dataset_tain_0):
         # clname1 = os.path.basename(_t1)
@@ -159,16 +80,17 @@ def load_data():
         npi0 = image.img_to_array(img0)
         npi0 = preprocess_input(npi0)
         #
-        x.append(npi1); y.append([1])
-        x.append(npi0); y.append([0])
+        x.append(npi1); y.append([1.,0.])
+        x.append(npi0); y.append([0.,1.])
 
 
     return np.array(x), np.array(y)
 
-x_train,y_train = load_data()
-y_train = np_utils.to_categorical(y_train, 2)
-# [0.,1.] --> Barco
-# [1.,0.] --> Mar o No Barco
+
+x_train,y_train = load_data(0,100)
+# y_train = np_utils.to_categorical(y_train, 2)
+# [1.,0.] --> Barco
+# [0.,1.] --> Mar o No Barco
 
 
 ##### Modelo Red Neuronal
@@ -196,18 +118,98 @@ for layer in Model.layers[:Layers_to_freeze]:
 Model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy'])
 
 
-Model.fit(x_train, y_train, batch_size=100, epochs=5, verbose=1, validation_split=0.1)
+
+Model.fit(x_train, y_train, batch_size=10, epochs=1, verbose=1, validation_split=0.1)
 
 
+#### Comprobaciones
+#
+# train_1 = '/Data_generated_1'
+# ruta_Data = os.getcwd() + '/Data'
+# k=glob(os.path.join(ruta_Data + train_1, '*'))
+# k1=k[-1]
+# imgp = image.load_img(k1)
+# npip = image.img_to_array(imgp)
+# npip = preprocess_input(npip)
+# npip = np.array(npip)
+# npip=npip.reshape((1,299,299,3))
+#
 
-
-
-
-# batch=5
+# batch=2
 # for n in range(0,len(x_train),batch):
 #     _x_train = x_train[n:n+batch]
 #     _y_train = y_train[n:n+batch]
 #     Model.train_on_batch(_x_train,_y_train)
 
-#train_on_batch
+
+
+# Model.get_weights()[0][0][0][0]
+
+############## Entrenamiento del tiron #################
+# len_train = 100 (200 imagenes, 100 con barcos y 100 sin barcos)
+#Train on 180 samples, validate on 20 samples
+# Epoch 1/1
+#  10/180 [>.............................] - ETA: 5:55 - loss: 0.7041 - acc: 0.6000
+#  20/180 [==>...........................] - ETA: 3:17 - loss: 0.5082 - acc: 0.7000
+#  30/180 [====>.........................] - ETA: 2:22 - loss: 0.3401 - acc: 0.8000
+#  40/180 [=====>........................] - ETA: 1:52 - loss: 0.7206 - acc: 0.7750
+#  50/180 [=======>......................] - ETA: 1:33 - loss: 0.7788 - acc: 0.7800
+#  60/180 [=========>....................] - ETA: 1:18 - loss: 0.6492 - acc: 0.8167
+#  70/180 [==========>...................] - ETA: 1:07 - loss: 0.8185 - acc: 0.8143
+#  80/180 [============>.................] - ETA: 58s - loss: 0.9046 - acc: 0.8125
+#  90/180 [==============>...............] - ETA: 50s - loss: 0.8347 - acc: 0.8222
+# 100/180 [===============>..............] - ETA: 43s - loss: 0.7522 - acc: 0.8400
+# 110/180 [=================>............] - ETA: 36s - loss: 0.6929 - acc: 0.8455
+# 120/180 [===================>..........] - ETA: 30s - loss: 0.6355 - acc: 0.8583
+# 130/180 [====================>.........] - ETA: 25s - loss: 0.5870 - acc: 0.8692
+# 140/180 [======================>.......] - ETA: 19s - loss: 0.6351 - acc: 0.8500
+# 150/180 [========================>.....] - ETA: 14s - loss: 0.6125 - acc: 0.8533
+# 160/180 [=========================>....] - ETA: 9s - loss: 0.5866 - acc: 0.8625
+# 170/180 [===========================>..] - ETA: 4s - loss: 0.6547 - acc: 0.8471
+# 180/180 [==============================] - 91s 504ms/step - loss: 0.6284 - acc: 0.8500 - val_loss: 2.4055 - val_acc: 0.8500
+# Out[2]: <keras.callbacks.History at 0x7f4508ad55f8>
+#
+# Pesos
+# Model.get_weights()[0][0][0][0]
+# array([-0.45910555, -0.04145266, -0.00362577, -0.09876725, -0.03370709,
+       #  0.0479929 ,  0.23254214,  0.32392767,  0.05901601,  0.09477382,
+       #  0.04249961,  0.12662047,  0.13321598,  0.12274183, -0.07926863,
+       #  0.0208228 , -0.19964783, -0.30268797, -0.21065992, -0.35289842,
+       # -0.5580231 ,  0.3202231 ,  0.00453596, -0.03092664, -0.06869579,
+       #  0.20096852,  0.11454275,  0.24037288,  0.01529435,  0.05962313,
+       # -0.05857147,  0.87817335], dtype=float32)
+########################################################
+
+############## Entrenamiento incremental con Model.fit #################
+# x_train,y_train = load_data(80,90)
+# Model.fit(x_train, y_train, batch_size=10, epochs=1, verbose=1, validation_split=0.1)
+# Train on 18 samples, validate on 2 samples
+# Epoch 1/1
+# 10/18 [===============>..............] - ETA: 3s - loss: 0.0477 - acc: 1.0000
+# 18/18 [==============================] - 8s 437ms/step - loss: 0.0399 - acc: 1.0000 - val_loss: 8.0151 - val_acc: 0.5000
+# Out[22]: <keras.callbacks.History at 0x7f27ffc93a20>
+# x_train,y_train = load_data(90,100)
+# Model.fit(x_train, y_train, batch_size=10, epochs=1, verbose=1, validation_split=0.1)
+# Train on 18 samples, validate on 2 samples
+# Epoch 1/1
+# 10/18 [===============>..............] - ETA: 3s - loss: 0.0597 - acc: 1.0000
+# 18/18 [==============================] - 9s 491ms/step - loss: 0.1756 - acc: 0.9444 - val_loss: 9.3887 - val_acc: 0.0000e+00
+# Out[24]: <keras.callbacks.History at 0x7f280821c630>
+
+# array([-0.45910555, -0.04145266, -0.00362577, -0.09876725, -0.03370709,
+#         0.0479929 ,  0.23254214,  0.32392767,  0.05901601,  0.09477382,
+#         0.04249961,  0.12662047,  0.13321598,  0.12274183, -0.07926863,
+#         0.0208228 , -0.19964783, -0.30268797, -0.21065992, -0.35289842,
+#        -0.5580231 ,  0.3202231 ,  0.00453596, -0.03092664, -0.06869579,
+#         0.20096852,  0.11454275,  0.24037288,  0.01529435,  0.05962313,
+#        -0.05857147,  0.87817335], dtype=float32)
+########################################################
+
+############## Entrenamiento incremental con Model.train_on_batch #################
+
+
+########################################################
+
+
+
 
