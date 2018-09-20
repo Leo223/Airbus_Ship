@@ -57,14 +57,14 @@ for row in df.iterrows():
 
 ###############################################################
 # Clustering de imagenes test, Creacion de ventanas para leer la imagen
-foto = '0005d01c8.jpg'
-data = ruta + foto
-ref = Image.open(data)
-imag = Image.open(data)
-im2 = imag.convert('L')
-im2 = image.img_to_array(im2)
-im2.resize((768,768))
-kmeans = KMeans(n_clusters=8, random_state=0).fit(im2)
+# foto = '0005d01c8.jpg'
+# data = ruta + foto
+# ref = Image.open(data)
+# imag = Image.open(data)
+# im2 = imag.convert('L')
+# im2 = image.img_to_array(im2)
+# im2.resize((768,768))
+# kmeans = KMeans(n_clusters=8, random_state=0).fit(im2)
 
 # Criterio de separacion
 # n_clus = kmeans.n_clusters
@@ -77,32 +77,32 @@ kmeans = KMeans(n_clusters=8, random_state=0).fit(im2)
 # Hacemos un kmeans y lo guardamos como imagen para
 # verificar los
 
-foto = '0005d01c8.jpg'
-data = ruta + foto
-# ref = Image.open(data)
-imag = Image.open(data)
-im2 = imag.convert('L')
-im2 = image.img_to_array(im2)
-im2.resize((768,768))
-im3=[]
-for i in im2:
-    for j in i: im3.append([j])
-
-km2 = KMeans(n_clusters=8, random_state=0).fit(im3)
-n_clus = km2.n_clusters
-clusters_size = np.array([list(km2.labels_).count(clus) for clus in range(n_clus)])
-cl_ship = list(clusters_size).index(clusters_size.min())
-
-_h = imag.size[0]
-_w = imag.size[1]
-ref = _h*_w
-x=np.array([km2.labels_[i*_h:i*_h+_h] for i in range(_h)])
-row = np.array([list(i).count(cl_ship) for i in x])
-col = np.array([list(i).count(cl_ship) for i in x.T])
-
-
-import scipy.misc
-scipy.misc.imsave('outfile.jpg', x)
+# foto = '0005d01c8.jpg'
+# data = ruta + foto
+# # ref = Image.open(data)
+# imag = Image.open(data)
+# im2 = imag.convert('L')
+# im2 = image.img_to_array(im2)
+# im2.resize((768,768))
+# im3=[]
+# for i in im2:
+#     for j in i: im3.append([j])
+#
+# km2 = KMeans(n_clusters=8, random_state=0).fit(im3)
+# n_clus = km2.n_clusters
+# clusters_size = np.array([list(km2.labels_).count(clus) for clus in range(n_clus)])
+# cl_ship = list(clusters_size).index(clusters_size.min())
+#
+# _h = imag.size[0]
+# _w = imag.size[1]
+# ref = _h*_w
+# x=np.array([km2.labels_[i*_h:i*_h+_h] for i in range(_h)])
+# row = np.array([list(i).count(cl_ship) for i in x])
+# col = np.array([list(i).count(cl_ship) for i in x.T])
+#
+#
+# import scipy.misc
+# scipy.misc.imsave('outfile.jpg', x)
 
 
 
@@ -141,7 +141,7 @@ def load_data():
     ruta_Data = os.getcwd() + '/Data'
     x = []
     y = []
-    len_train = 1000
+    len_train = 10
     train_1 = '/Data_generated_1'
     train_0 = '/Data_generated_0'
     dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[:len_train]
@@ -183,21 +183,31 @@ def add_new_last_layer(base_model, nb_classes):
     x = Dense(2048,activation = 'relu')(x)
     x_pred = Dense(nb_classes,activation='softmax')(x)
     model = Model(inputs=base_model.input,outputs=x_pred)
-
     return model
 
 nb_classes = 2
 Model = add_new_last_layer(base_model,nb_classes)
 
-Layers_to_freeze = 500
+Layers_to_freeze = 10
 
 for layer in Model.layers[:Layers_to_freeze]:
     layer.trainable = False
 
-Model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
+Model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy'])
+
+
 Model.fit(x_train, y_train, batch_size=100, epochs=5, verbose=1, validation_split=0.1)
 
 
 
 
+
+
+# batch=5
+# for n in range(0,len(x_train),batch):
+#     _x_train = x_train[n:n+batch]
+#     _y_train = y_train[n:n+batch]
+#     Model.train_on_batch(_x_train,_y_train)
+
+#train_on_batch
 
