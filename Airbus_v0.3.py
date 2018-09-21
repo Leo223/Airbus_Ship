@@ -112,7 +112,7 @@ im2 = image.img_to_array(im2)
 im2.resize((768,768))
 im3=[]
 for i in im2:
-    for j in i: im3.append([j])
+    for j in i: im3.append([j[0]])
 
 km2 = KMeans(n_clusters=8, random_state=0).fit(im3)
 n_clus = km2.n_clusters
@@ -130,7 +130,7 @@ col = np.array([list(i).count(cl_ship) for i in x.T])
 
 
 
-
+# Array to image
 import scipy.misc
 scipy.misc.imsave('outfile.jpg', x)
 
