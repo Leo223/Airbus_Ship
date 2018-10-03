@@ -16,6 +16,9 @@ data = ruta + foto
 
 csv_targets = os.getcwd() + '/Data/train_ship_segmentations.csv'
 
+ruta_data_generated_1 = '/Data/Data_generated_1/'
+ruta_data_generated_0 = '/Data/Data_generated_0/'
+
 # df de los targets
 df = pd.read_csv(csv_targets)
 df = df.fillna(value=0)
@@ -50,17 +53,6 @@ for row in df.iterrows():
     targets[foto] = {'Data': Data, 'Cuadriculas': Cuadriculas}
 
 
-# foto = '00021ddc3.jpg'
-# data = ruta + foto
-# imag = Image.open(data)
-# barcos=targets.get(foto).get('Cuadriculas')
-# b1=barcos[0]
-# v1=b1[0]
-# v2=b1[-1]
-# box = (v1[0],v1[1],v2[0],v2[1])
-
-
-
 # se crean las imagenes para entrenar (imagenes con barcos) --> 1
 for picture in targets:
     datos = targets.get(picture).get('Data')
@@ -77,7 +69,7 @@ for picture in targets:
         giros = [0,90,180,270]
         for giro in giros:
             ship_giro = ship.rotate(giro)
-            ship_giro.save(os.getcwd()+'/Data/Data_generated_1/'+picture +'_barco_'+str(giro) +'_'+ str(barco[0]+1)+'.png')
+            ship_giro.save(os.getcwd()+ ruta_data_generated_1 +picture +'_barco_'+str(giro) +'_'+ str(barco[0]+1)+'.png')
 
 
 # se crean las imagenes para entrenar (imagenes sin barcos) --> 0
@@ -90,7 +82,7 @@ for picture in targets:
     giros = [0, 90, 180, 270]
     for giro in giros:
         imag_giro = imag.rotate(giro)
-        imag_giro.save(os.getcwd()+'/Data/Data_generated_0/'+picture.split('.')[0]+'_mar_'+str(giro)+'_'+str(barco[0] + 1)+'.png')
+        imag_giro.save(os.getcwd() + ruta_data_generated_0 + picture.split('.')[0]+'_mar_'+str(giro)+'_'+str(barco[0] + 1)+'.png')
 
 
 #

@@ -200,10 +200,23 @@ Model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy']
 Model.fit(x_train, y_train, batch_size=100, epochs=5, verbose=1, validation_split=0.1)
 
 
+#########
+########
+x,y = load_data(0,5000)
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=2)
 
+x1 = np.array([elem.reshape(1,-1)[0] for elem in x])
+y1 = np.array([elem[0] for elem in y])
 
+knn.fit(x1,y1)
 
+# print(knn.predict([[1.1]]))
 
+x2,y2 = load_data(5000,5050)
+y2_pred = np.array([knn.predict(_x.reshape(1,-1))[0]  for _x in x2])
+
+y2_pred + y1[:100]
 
 # batch=2
 # for n in range(0,len(x_train),batch):

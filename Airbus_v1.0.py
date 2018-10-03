@@ -66,19 +66,22 @@ def load_data(init=0, len_train=100):
     y = []
     train_1 = '/Data_generated_1'
     train_0 = '/Data_generated_0'
-    dataset_tain_1 = glob(os.path.join(ruta_Data + train_1, '*'))[init:len_train]
-    dataset_tain_0 = glob(os.path.join(ruta_Data + train_0, '*'))[init:len_train]
+    dataset_train_1 = glob(os.path.join(ruta_Data + train_1, '*'))[init:len_train]
+    dataset_train_0 = glob(os.path.join(ruta_Data + train_0, '*'))[init:len_train]
 
-    for _t1,_t0 in zip(dataset_tain_1,dataset_tain_0):
+    for _t1,_t0 in zip(dataset_train_1,dataset_train_0):
         # clname1 = os.path.basename(_t1)
         # clname2 = os.path.basename(_t0)
-        img1 = image.load_img(_t1)
-        npi1 = image.img_to_array(img1)
-        npi1 = preprocess_input(npi1)
-        #
-        img0 = image.load_img(_t0)
-        npi0 = image.img_to_array(img0)
-        npi0 = preprocess_input(npi0)
+        try:
+            img1 = image.load_img(_t1)
+            npi1 = image.img_to_array(img1)
+            npi1 = preprocess_input(npi1)
+            #
+            img0 = image.load_img(_t0)
+            npi0 = image.img_to_array(img0)
+            npi0 = preprocess_input(npi0)
+        except:
+            continue
         #
         x.append(npi1); y.append([1.,0.])
         x.append(npi0); y.append([0.,1.])
@@ -86,7 +89,7 @@ def load_data(init=0, len_train=100):
 
     return np.array(x), np.array(y)
 
-size = 130000
+# size = 130000
 # x_train,y_train = load_data(0,size)
 # y_train = np_utils.to_categorical(y_train, 2)
 # [1.,0.] --> Barco
@@ -110,7 +113,7 @@ def add_new_last_layer(base_model, nb_classes):
 nb_classes = 2
 Model = add_new_last_layer(base_model,nb_classes)
 
-Layers_to_freeze = 10
+Layers_to_freeze = 1
 
 for layer in Model.layers[:Layers_to_freeze]:
     layer.trainable = False
@@ -141,14 +144,37 @@ Model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy']
 #     _y_train = y_train[n:n+batch]
 #     Model.train_on_batch(_x_train,_y_train)
 
-size = 130000
+size = 116224
 step = 10
 epochs=1
 # for epoch in range(epochs):
 for i in range(0,size,step):
     (print(i,i+step))
     x_train, y_train = load_data(i,i+step)
-    Model.fit(x_train, y_train, batch_size=1, epochs=1, verbose=1)
+    Model.fit(x_train, y_train, batch_size=10, epochs=1, verbose=1)
+
+Model.save('trained_model_local.h5')
+
+
+######### knn #############
+x,y = load_data(0,1000)
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors= 4)
+
+x1 = np.array([elem.reshape(1,-1)[0] for elem in x])
+y1 = np.array([elem[0] for elem in y])
+
+knn.fit(x1,y1)
+
+# print(knn.predict([[1.1]]))
+
+x2,y2 = load_data(3000,3050)
+y2_pred = np.array([knn.predict(_x.reshape(1,-1))[0]  for _x in x2])
+
+y2_pred + y1[:100]
+############################
+
+
 
 
 

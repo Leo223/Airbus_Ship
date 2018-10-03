@@ -51,7 +51,7 @@ for row in df.iterrows():
     targets[foto] = {'Data': Data, 'Cuadriculas': Cuadriculas}
 
 
-
+quit()
 ###############################################################
 # Clustering de imagenes test, Creacion de ventanas para leer la imagen
 foto = '0005d01c8.jpg'
