@@ -80,40 +80,78 @@ k=y[0]
 kuni=[[j[0]] for i in k for j in i]
 
 
-
-imagen = nombre_fotos[2]
+im1 = Image.open(os.getcwd() + '/Data/train' + '/0005d01c8.jpg')
+imagen = nombre_fotos[5]
 def Anal_imag(imagen):
     ruta_Data = os.getcwd() + '/Data/test/'+ imagen
     im1 = Image.open(ruta_Data)
-    im1 = im1.convert('L')
-    npi1 = image.img_to_array(im1)
-    # kuni = [[j[0]] for i in npi1 for j in i]
-    km = KMeans(n_clusters=2, random_state=0).fit(npi1)
-    clus = km.labels_.reshape(768,768)
+    im2 = im1.convert('L')
+    npi1 = image.img_to_array(im2)
+    npi1 = npi1.reshape(768,768)
+    # kuni = [j[0] for i in npi1 for j in i]
+    # km = KMeans(n_clusters=2, random_state=0).fit(npi1)
+    # clus = km.labels_.reshape(768,768)
 
 
+imagen = '0005d01c8.jpg'
 
+def ventanas(ruta_Data):
+    # try:
+    #     ruta_Data = os.getcwd() + '/Data/test/'+ imagen
+    # except:
+    #     ruta_Data = os.getcwd() + '/Data/train/' + imagen
 
+    im1 = Image.open(ruta_Data)
 
+    angles = [0,270]
+    vertices_1=[]
+    vertices_2=[]
+    for angl in angles:
 
+        im1 = im1.rotate(angl)
+        im2 = im1.convert('L')
+        npi1 = image.img_to_array(im2)
+        npi1 = npi1.reshape(768, 768)
 
+        km = KMeans(n_clusters=8, random_state=0).fit(npi1)
+        loc = km.labels_
 
+        cont_clus = [list(loc).count(clus) for clus in range(km.n_clusters)]
+        No_barcos_clus = cont_clus.index(max(cont_clus))
+        positions = [i[0] for i in enumerate(loc) if i[1]!= No_barcos_clus]
 
+        intervals=[]
+        n1 = np.array(positions)
+        _pos = positions[1:]
+        _pos.append(positions[-1]+1)
+        n2 = np.array(_pos)
+        dif = n2-n1
+        # _loc_w = [val[0] for val in enumerate(dif) if val[1]!=1]
+        _loc_w = []
+        for val in enumerate(dif):
+            if val[1]!=1:
+                _loc_w.append(positions[val[0]])
+                _loc_w.append(positions[val[0]+1])
 
-from sklearn.neighbors import KNeighborsClassifier
-knn = KNeighborsClassifier(n_neighbors=2)
+        v0 = [positions[0]]
+        vf = [positions[-1]]
+        loc_w = v0 + _loc_w + vf
+        # v1 = [(loc_w[elem - 1], loc_w[elem]) for elem in range(1, len(loc_w), 2)]
+        if angl ==0: vertices_1 = loc_w
+        else: vertices_2=loc_w
 
-x1 = np.array([elem.reshape(1,-1)[0] for elem in x])
-y1 = np.array([elem[0] for elem in y])
+    im1 = im1.rotate(-angl)
+    return vertices_2,vertices_1
 
-knn.fit(x1,y1)
+ruta_Data = os.getcwd() + '/Data/train' + '/0005d01c8.jpg'
+# im1 = Image.open(os.getcwd() + '/Data/train' + '/0005d01c8.jpg')
+# imagen = '0005d01c8.jpg'
+imag=im1
 
-# print(knn.predict([[1.1]]))
-
-x2,y2 = load_data(5000,5050)
-y2_pred = np.array([knn.predict(_x.reshape(1,-1))[0]  for _x in x2])
-
-y2_pred + y1[:100]
+x,y = ventanas(ruta_Data)
+# [[(263, 308), (616, 723)], [(85, 184), (186, 215), (484, 534), (536, 548)]]
+for _x in x:
+    for _y in y: imag.putpixel((_x,_y), (0, 255, 0))
 
 
 
@@ -129,5 +167,48 @@ y2_pred + y1[:100]
 
 # '/home/jcambronero/Escritorio/JCP/Cursos/Kaggle/Airbus_Ship/Data/test/501eff990.jpg'
 # ship = im1.crop((620,630,720,760))
+
+
+
+
+# loc = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+#        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+#        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+#        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+
+
+
 
 
